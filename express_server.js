@@ -49,8 +49,6 @@ app.post("/urls", (req, res) => {
   } else {
     const newKey = generateRandomString();
     urlDatabase[newKey] = req.body.longURL;
-    console.log(newKey);
-    console.log(urlDatabase);
     res.redirect(`/urls/${newKey}`);
   }
 });
