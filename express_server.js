@@ -32,6 +32,11 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
+// GET: local address containing the registration page
+app.get("/register", (req, res) => {
+  res.render("registration");
+}
+
 // GET: local address containing URLs collection
 app.get("/urls", (req, res) => {
   let templateVars = {
