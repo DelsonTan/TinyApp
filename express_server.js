@@ -19,9 +19,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  console.log("shortURL", req.params.shortURL)
   let longURL = urlDatabase[req.params.shortURL];
-  console.log("longURL",longURL);
   if (!longURL) {
     res.status(404).send("Status Code: 404: The URL you requested for was not found");
   } else {
@@ -29,7 +27,7 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
-// GET urls collection
+// GET page containing URLs collection
 app.get("/urls", (req, res) => {
   let templateVars = {urls: urlDatabase};
   res.render("urls_index", templateVars);
@@ -39,30 +37,36 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-// POST url to urls collection
+// POST URL to URLs collection
 app.post("/urls", (req, res) => {
-  console.log(req.body);
-  if (!(req.body['longURL'].includes("www")
-    || !req.body['longURL'].includes("http://")
-    || !req.body['longURL'].includes("https://"))) {
-    res.send("Entered an invalid URL, go back and try again. ");
-  } else {
-    const newKey = generateRandomString();
-    urlDatabase[newKey] = req.body.longURL;
-    res.redirect(`/urls/${newKey}`);
+  const newKey = generateRandomString();
+  urlDatabase[newKey] = req.body.longURL;
+  console.log(typeof urlDatabase[newKey]);
+  if (!urlDatabase[newKey].includes("http://") &&
+    !urlDatabase[newKey].includes("https://")) {
+    urlDatabase[newKey] = "http://" + urlDatabase[newKey];
   }
+  res.redirect(`/urls/${newKey}`);
 });
 
+// DELETE URL from URL collection
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect('/urls');
 });
 
 app.post("/urls/:id/update", (req, res) => {
-  urlDatabase[req.params.id] = req.body[req.params.id];
+  const shortURL = req.params.id;
+  urlDatabase[shortURL] = req.body[shortURL];
+  if (!urlDatabase[shortURL].includes("http://") &&
+    !urlDatabase[shortURL].includes("https://")) {
+    urlDatabase[shortURL] = "http://" + urlDatabase[shortURL];
+  }
   res.redirect('/urls');
 });
 
+
+// GET page containing details for a shortened URL
 app.get("/urls/:id", (req, res) => {
   let templateVars = { shortURL: req.params.id, urls: urlDatabase };
   res.render("urls_show", templateVars);
