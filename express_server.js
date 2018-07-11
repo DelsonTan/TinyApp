@@ -9,7 +9,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
-  " 9sm5xK": "http://www.google.com"
+  "9sm5xK": "http://www.google.com"
 };
 
 app.get("/", (req, res) => {
@@ -41,6 +41,11 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect('/urls');
 });
 
+app.post("/urls/:id/update", (req, res) => {
+  //urlDatabase[req.params.id] =;
+  res.redirect('/urls');
+});
+
 app.get("/urls/:id", (req, res) => {
   let templateVars = { shortURL: req.params.id, urls: urlDatabase };
   res.render("urls_show", templateVars);
@@ -53,6 +58,10 @@ app.get("/u/:shortURL", (req, res) => {
   } else {
     res.redirect(302,longURL);
   }
+});
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
 });
 
 app.listen(PORT, () => {

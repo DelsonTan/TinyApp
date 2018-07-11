@@ -12,10 +12,9 @@
     <tr>
       <td><%= url%> :     </td>
       <td><%= urls[url] %></td>
-      <td><button><form method="POST" action="/urls/<%= url %>/update"><input type="submit" value="Update"></input></form></button></td>
       <td><button><form method="POST" action="/urls/<%= url %>/delete"><input type="submit" value="Delete"></input></form></button></td>
     </tr>
-    <%}                 %>
+    <%}                      %>
   </table>
 
   <p><a href="http://localhost:8080/urls/new">Shorten your url here</a> </p>
