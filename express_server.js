@@ -2,10 +2,12 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 
 app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -15,7 +17,10 @@ const urlDatabase = {
 
 // GET: root address
 app.get("/", (req, res) => {
-  res.render("index");
+  let templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("index", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -29,12 +34,28 @@ app.get("/u/:shortURL", (req, res) => {
 
 // GET: local address containing URLs collection
 app.get("/urls", (req, res) => {
-  let templateVars = {urls: urlDatabase};
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render("urls_index", templateVars);
 });
 
-// POST: new local address containing details for a shortned URL
+// GET: local address containing details for a shortened URL
+app.get("/urls/:id", (req, res) => {
+  let templateVars = {
+    shortURL: req.params.id,
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
+  res.render("urls_show", templateVars);
+});
+
+// POST: new local address containing details for a shortened URL
 app.get("/urls/new", (req, res) => {
+  let templateVars = {
+    username: req.cookies["username"]
+  };
   res.render("urls_new");
 });
 
@@ -48,6 +69,21 @@ app.post("/urls", (req, res) => {
   }
   res.redirect(`/urls/${newKey}`);
 });
+
+// POST: create cookie for inputted username, then
+// redirects user to /urls
+app.post("/login", (req, res) => {
+  const username = req.body.username;
+  res.cookie('username', username);
+  res.redirect("/urls");
+
+});
+
+// POST: logs the user out, and redirects user to /urls
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("urls");
+})
 
 // DELETE: URL from URL collection
 app.post("/urls/:id/delete", (req, res) => {
@@ -65,14 +101,6 @@ app.post("/urls/:id/update", (req, res) => {
   }
   res.redirect('/urls');
 });
-
-
-// GET: local address containing details for a shortened URL
-app.get("/urls/:id", (req, res) => {
-  let templateVars = { shortURL: req.params.id, urls: urlDatabase };
-  res.render("urls_show", templateVars);
-});
-
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <%- include('partials/_header') %>
 </head>
 <body>
@@ -12,7 +12,7 @@
     <tr>
       <td><%= url%> :     </td>
       <td><%= urls[url] %></td>
-      <td><button><form method="GET" action="/urls/<%= url %>"><input type="submit" value="Edit"></input></form></button></td>
+      <td><button><form method="GET" action="/urls/<%= url %>">        <input type="submit" value="Edit">  </input></form></button></td>
       <td><button><form method="POST" action="/urls/<%= url %>/delete"><input type="submit" value="Delete"></input></form></button></td>
     </tr>
     <%}                      %>
