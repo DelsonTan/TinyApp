@@ -26,7 +26,13 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  res.redirect(URLPairToURL(addURLPair(req.body)));
+  if (!(req.body['longURL'].includes("www")
+    || req.body['longURL'].includes("http://")
+    || req.body['longURL'].includes("https://"))) {
+    res.send("Entered an invalid URL, go back and try again. ");
+  } else {
+    res.redirect(URLPairToURL(addURLPair(req.body)));
+  }
 });
 
 app.get("/urls/:id", (req, res) => {
