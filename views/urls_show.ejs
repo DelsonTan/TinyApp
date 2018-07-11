@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <%- include('partials/_header') %>
+</head>
+<body>
+    <!-- Add your EJS code here -->
+  <table>
+    <tr><th> URLS </th></tr>
+    <tr><td>Short</td><td>Full</td></tr>
+    <tr><td><%=shortURL%></td><td><%=urls[shortURL]%></td></tr>
+  </table>
+    <p><a href="http://localhost:8080/urls/">URL Index</a></p>
+</body>
+</html>
