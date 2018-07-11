@@ -9,7 +9,12 @@
     <tr><th> URLS </th></tr>
 
     <%for (var url in urls) {%>
-    <tr><td><%= url%> : </td><td><%= urls[url] %></td></tr>
+    <tr>
+      <td><%= url%> :     </td>
+      <td><%= urls[url] %></td>
+      <td><button><form method="POST" action="/urls/<%= url %>/update"><input type="submit" value="Update"></input></form></button></td>
+      <td><button><form method="POST" action="/urls/<%= url %>/delete"><input type="submit" value="Delete"></input></form></button></td>
+    </tr>
     <%}                 %>
   </table>
 
