@@ -12,10 +12,24 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+
+// GET root directory
 app.get("/", (req, res) => {
   res.render("index");
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  console.log("shortURL", req.params.shortURL)
+  let longURL = urlDatabase[req.params.shortURL];
+  console.log("longURL",longURL);
+  if (!longURL) {
+    res.status(404).send("Status Code: 404: The URL you requested for was not found");
+  } else {
+    res.redirect(302,longURL);
+  }
+});
+
+// GET urls collection
 app.get("/urls", (req, res) => {
   let templateVars = {urls: urlDatabase};
   res.render("urls_index", templateVars);
@@ -25,14 +39,19 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-
+// POST url to urls collection
 app.post("/urls", (req, res) => {
+  console.log(req.body);
   if (!(req.body['longURL'].includes("www")
-    || req.body['longURL'].includes("http://")
-    || req.body['longURL'].includes("https://"))) {
+    || !req.body['longURL'].includes("http://")
+    || !req.body['longURL'].includes("https://"))) {
     res.send("Entered an invalid URL, go back and try again. ");
   } else {
-    res.redirect(URLPairToURL(addURLPair(req.body)));
+    const newKey = generateRandomString();
+    urlDatabase[newKey] = req.body.longURL;
+    console.log(newKey);
+    console.log(urlDatabase);
+    res.redirect(`/urls/${newKey}`);
   }
 });
 
@@ -42,7 +61,7 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/urls/:id/update", (req, res) => {
-  //urlDatabase[req.params.id] =;
+  urlDatabase[req.params.id] = req.body[req.params.id];
   res.redirect('/urls');
 });
 
@@ -51,14 +70,6 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
-  if (!longURL) {
-    res.status(404).send("Status Code: 404: The URL you requested for was not found");
-  } else {
-    res.redirect(302,longURL);
-  }
-});
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -76,30 +87,4 @@ function generateRandomString() {
     text += selection.charAt(Math.floor(Math.random() * selection.length));
   }
   return text;
-}
-
-// GIVEN: object containing a single key-value pair with:
-// key   = longURL
-// value = the long URL
-// SIDE EFFECT: adds key-value pair to urlDatabase object where:
-// key   = randomly generated string of characters of length 6
-// value = the long URL value from the given key-value pair
-// RETURNS: the key-value pair added to the database
-function addURLPair(obj) {
-  const shortURL = generateRandomString();
-  let result = {};
-  result[shortURL] = obj['longURL'];
-
-  urlDatabase[shortURL] = result[shortURL];
-  return result;
-}
-
-// GIVEN: object containing a single key-value pair with:
-// key   = shortURL
-// value = longURL
-// SIDE EFFECT: none
-// RETURN: string of the form 'http://localhost:8080/urls/<shortURL>'
-function URLPairToURL(obj) {
-  const objKey = Object.keys(obj)[0];
-  return `http://localhost:8080/urls/${objKey}`;
 }
