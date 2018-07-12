@@ -122,7 +122,7 @@ app.post("/login", (req, res) => {
       if (users[user].password === req.body.password) {
         // templateVars.user_id = users[user].id;
         res.cookie('user_id', currentUser.id);
-        res.redirect("/urls");
+        res.redirect("/");
         return
       }
     }
