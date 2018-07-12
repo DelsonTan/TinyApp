@@ -38,7 +38,7 @@ app.get("/", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
   if (!longURL) {
-    res.status(404).send("Status Code: 404: The URL you requested for was not found");
+    res.status(404).send("Status Code 404 - Not Found: The URL you requested for was not found");
   } else {
     res.redirect(302,longURL);
   }
@@ -79,6 +79,17 @@ app.get("/urls/:id", (req, res) => {
 // POST: adds a new user object in the global users object
 // then redirects user to /urls
 app.post("/register", (req, res) => {
+  if (req.body.email === "") {
+    res.status(404).send("Status Code 400 - Bad Request: The email field is empty.");
+  }
+  if (req.body.password === "") {
+    res.status(404).send("Status Code 400 - Bad Request: The password field is empty.");
+  }
+  for (user in users) {
+    if ((users[user].email).toLowerCase() === req.body.email.toLowerCase()) {
+      res.status(404).send("Status Code 400 - Bad Request: This email address is already registered.");
+    }
+  }
   const uniqueID = generateRandomString(8);
   users[uniqueID]          = {}
   users[uniqueID].id       = uniqueID;
