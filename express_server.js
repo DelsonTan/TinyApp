@@ -9,12 +9,12 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
-const urlDatabase = {
+let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-const users = {
+let users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
@@ -77,6 +77,17 @@ app.get("/urls/:id", (req, res) => {
 });
 
 // POST: adds a new user object in the global users object
+// then redirects user to /urls
+app.post("/register", (req, res) => {
+  const uniqueID = generateRandomString(8);
+  users[uniqueID]          = {}
+  users[uniqueID].id       = uniqueID;
+  users[uniqueID].email    = req.body.email;
+  users[uniqueID].password = req.body.password;
+  res.cookie('user_id', uniqueID);
+  console.log(users);
+  res.redirect("/urls");
+})
 
 
 // POST: URL to URLs collection
