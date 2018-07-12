@@ -89,6 +89,15 @@ app.get("/urls/new", (req, res) => {
 
 // GET: local address containing details for a shortened URL
 app.get("/urls/:id", (req, res) => {
+  if (!req.cookies.user_id) {
+    res.redirect("/login");
+    return;
+  }
+  if (req.cookies.user_id !== urlDatabase[req.params.id].id) {
+    res.redirect("/urls");
+    return;
+  }
+
   let vars = templateVars ;
   vars["shortURL"] = req.params.id;
   res.render("urls_show", templateVars(req.cookies("user_id")));
