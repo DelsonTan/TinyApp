@@ -73,6 +73,10 @@ app.get("/login", (req, res) => {
 
 // GET: local address containing URLs collection
 app.get("/urls", (req, res) => {
+  if (!req.cookies.user_id) {
+    res.redirect("/login");
+    return;
+  }
   let localVars = templateVars;
   localVars.user_id = req.cookies.user_id;
   res.render("urls_index", templateVars(req.cookies.user_id));
@@ -165,7 +169,7 @@ app.post("/urls/:id/delete", (req, res) => {
     res.redirect("/login");
     return;
   }
-  if (req.params.id == req.cookies.user_id) {
+  if (urlDatabase[req.params.id].user === req.cookies.user_id) {
     delete urlDatabase[req.params.id];
   }
   res.redirect('/urls');
