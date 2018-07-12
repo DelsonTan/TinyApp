@@ -47,13 +47,13 @@ app.get("/", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL.longURL];
+  let longURL = urlDatabase[req.params["shortURL"]].longURL;
   if (!longURL) {
     res.status(404).send("Status Code 404 - Not Found: The URL you requested for was not found");
-  } else {
-    res.redirect(302,longURL);
+    return;
   }
-});
+  res.redirect(302, longURL);
+  })
 
 // GET: local address containing the registration page
 app.get("/register", (req, res) => {
