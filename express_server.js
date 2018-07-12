@@ -139,6 +139,10 @@ app.post("/urls", (req, res) => {
 // POST: create cookie for inputted username, then
 // redirects user to /urls
 app.post("/login", (req, res) => {
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(400).send("Status Code 400 - Bad Request: The email and/or password field is empty.");
+    return;
+  }
   for (let user in users) {
     if (users[user].email.toLowerCase() === req.body.email.toLowerCase()
       && users[user].password === req.body.password) {
