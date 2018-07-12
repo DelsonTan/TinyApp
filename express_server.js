@@ -47,11 +47,11 @@ app.get("/", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params["shortURL"]].longURL;
-  if (!longURL) {
+  if (!urlDatabase[req.params["shortURL"]]) {
     res.status(404).send("Status Code 404 - Not Found: The URL you requested for was not found");
     return;
   }
+  let longURL = urlDatabase[req.params["shortURL"]].longURL;
   res.redirect(302, longURL);
   })
 
@@ -125,11 +125,14 @@ app.post("/register", (req, res) => {
 // POST: URL to URLs collection
 app.post("/urls", (req, res) => {
   const newKey = generateRandomString(6);
-  urlDatabase[newKey].longURL = req.body.longURL;
-  if (!urlDatabase[newKey].includes("http://") &&
-    !urlDatabase[newKey].includes("https://")) {
-    urlDatabase[newKey] = "http://" + urlDatabase[newKey];
+  let newURL = req.body.longURL;
+  if (!newURL.includes("http://") && !newURL.includes("https://")) {
+    newURL = "http://" + newURL;
   }
+  urlDatabase[newKey] = {};
+  urlDatabase[newKey].longURL = newURL;
+  urlDatabase[newKey].user = req.cookies.user_id;
+  console.log(urlDatabase);
   res.redirect(`/urls/${newKey}`);
 });
 
