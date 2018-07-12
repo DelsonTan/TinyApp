@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 
 app.set("view engine", "ejs");
 
@@ -10,36 +10,50 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
 let urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    user: "3ns8dA"
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    user: "K49kds"
+  }
 };
 
 let users = {
- //  "userRandomID": {
- //    id: "userRandomID",
- //    email: "user@example.com",
- //    password: "purple-monkey-dinosaur"
- //  },
- // "user2RandomID": {
- //    id: "user2RandomID",
- //    email: "user2@example.com",
- //    password: "dishwasher-funk"
- //  }
+  "3ns8dA": {
+    id: "3ns8dA",
+    email: "user1@user.com",
+    password: "purple-monkey-dinosaur"
+  },
+ "K49kds": {
+    id: "K49kds",
+    email: "user2@user.com",
+    password: "dishwasher-funk"
+  }
 };
 
-let templateVars = {
-  urls: urlDatabase,
-  user: users,
-  currentUser: undefined
-};
+// let templateVars = {
+//   urls: urlDatabase,
+//   user: users,
+//   currentUser: undefined
+// };
+
+function templateVars(user_id) {
+  return {
+    urls: urlDatabase,
+    user: users,
+    currentUser: user_id
+  };
+}
 
 // GET: root address
 app.get("/", (req, res) => {
-  res.render("index", templateVars);
+  res.render("index", templateVars(req.cookies.user_id));
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
+  let longURL = urlDatabase[req.params.shortURL.longURL];
   if (!longURL) {
     res.status(404).send("Status Code 404 - Not Found: The URL you requested for was not found");
   } else {
@@ -49,35 +63,35 @@ app.get("/u/:shortURL", (req, res) => {
 
 // GET: local address containing the registration page
 app.get("/register", (req, res) => {
-  res.render("registration",templateVars);
+  res.render("registration",templateVars(req.cookies.user_id));
 })
 
 // GET: local address containing the login page
 app.get("/login", (req, res) => {
-  res.render("login", templateVars);
+  res.render("login", templateVars(req.cookies.user_id));
 })
 
 // GET: local address containing URLs collection
 app.get("/urls", (req, res) => {
   let localVars = templateVars;
   localVars.user_id = req.cookies.user_id;
-  res.render("urls_index", templateVars);
+  res.render("urls_index", templateVars(req.cookies.user_id));
 });
 
 // GET: new local address containing details for a shortened URL
 app.get("/urls/new", (req, res) => {
-  if (templateVars.currentUser === undefined) {
+  if (req.cookies.user_id === undefined) {
     res.redirect("/login");
     return;
   }
-  res.render("urls_new", templateVars);
+  res.render("urls_new", templateVars(req.cookies.user_id));
 });
 
 // GET: local address containing details for a shortened URL
 app.get("/urls/:id", (req, res) => {
   let vars = templateVars ;
   vars["shortURL"] = req.params.id;
-  res.render("urls_show", templateVars);
+  res.render("urls_show", templateVars(req.cookies("user_id")));
 });
 
 // POST: adds a new user object in the global users object
@@ -87,7 +101,7 @@ app.post("/register", (req, res) => {
     res.status(400).send("Status Code 400 - Bad Request: The email and/or password field is empty.");
     return;
   }
-  for (user in users) {
+  for (let user in users) {
     if ((users[user].email).toLowerCase() === req.body.email.toLowerCase()) {
       res.status(400).send("Status Code 400 - Bad Request: This email address is already registered.");
       return;
@@ -99,7 +113,6 @@ app.post("/register", (req, res) => {
   users[uniqueID].email    = req.body.email;
   users[uniqueID].password = req.body.password;
   res.cookie('user_id', uniqueID);
-  templateVars.currentUser = users[uniqueID].email;
   res.redirect("/urls");
 })
 
@@ -107,7 +120,7 @@ app.post("/register", (req, res) => {
 // POST: URL to URLs collection
 app.post("/urls", (req, res) => {
   const newKey = generateRandomString(6);
-  urlDatabase[newKey] = req.body.longURL;
+  urlDatabase[newKey].longURL = req.body.longURL;
   if (!urlDatabase[newKey].includes("http://") &&
     !urlDatabase[newKey].includes("https://")) {
     urlDatabase[newKey] = "http://" + urlDatabase[newKey];
@@ -118,10 +131,9 @@ app.post("/urls", (req, res) => {
 // POST: create cookie for inputted username, then
 // redirects user to /urls
 app.post("/login", (req, res) => {
-  for (user in users) {
+  for (let user in users) {
     if (users[user].email.toLowerCase() === req.body.email.toLowerCase()
       && users[user].password === req.body.password) {
-      templateVars.currentUser = users[user].email;
       res.cookie('user_id', users[user].id);
       res.redirect("/");
       return
@@ -146,11 +158,11 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // PUT: updates long URL value for inputted short URL key to a new value
 app.post("/urls/:id/update", (req, res) => {
-  const shortURL = req.params.id;
-  urlDatabase[shortURL] = req.body[shortURL];
-  if (!urlDatabase[shortURL].includes("http://") &&
-    !urlDatabase[shortURL].includes("https://")) {
-    urlDatabase[shortURL] = "http://" + urlDatabase[shortURL];
+  const newShort = req.params.id;
+  urlDatabase[shortURL] = req.body[newShort];
+  if (!urlDatabase[newShort].includes("http://") &&
+    !urlDatabase[newShort].includes("https://")) {
+    urlDatabase[newShort].longURL = "http://" + urlDatabase[shortURL];
   }
   res.redirect('/urls');
 });
@@ -173,3 +185,5 @@ function generateRandomString(num) {
   }
   return text;
 }
+
+// cookies(user_id)
