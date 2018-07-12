@@ -33,17 +33,11 @@ let users = {
   }
 };
 
-// let templateVars = {
-//   urls: urlDatabase,
-//   user: users,
-//   currentUser: undefined
-// };
-
-function templateVars(user_id) {
+function templateVars(cookie_user_id) {
   return {
     urls: urlDatabase,
     user: users,
-    currentUser: user_id
+    currentUser: cookie_user_id
   };
 }
 
@@ -77,9 +71,7 @@ app.get("/urls", (req, res) => {
     res.redirect("/login");
     return;
   }
-  let localVars = templateVars;
-  localVars.user_id = req.cookies.user_id;
-  res.render("urls_index", templateVars(req.cookies.user_id));
+  res.render("urls_index", urlsForUser(req.cookies.user_id));
 });
 
 // GET: new local address containing details for a shortened URL
@@ -205,4 +197,16 @@ function generateRandomString(num) {
   return text;
 }
 
-// cookies(user_id)
+function urlsForUser(id) {
+  let newTemplateVars = {};
+  newTemplateVars.urls = {};
+  for (shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].user === id) {
+      newTemplateVars.urls[shortURL] = urlDatabase[shortURL];
+    }
+  }
+
+  newTemplateVars.user = users;
+  newTemplateVars.currentUser = id;
+  return newTemplateVars;
+}
