@@ -15,23 +15,26 @@ let urlDatabase = {
 };
 
 let users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
- "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-}
+ //  "userRandomID": {
+ //    id: "userRandomID",
+ //    email: "user@example.com",
+ //    password: "purple-monkey-dinosaur"
+ //  },
+ // "user2RandomID": {
+ //    id: "user2RandomID",
+ //    email: "user2@example.com",
+ //    password: "dishwasher-funk"
+ //  }
+};
+
+let templateVars = {
+  urls: urlDatabase,
+  user: users,
+  user_id: undefined
+};
 
 // GET: root address
 app.get("/", (req, res) => {
-  let templateVars = {
-    username: req.cookies["username"]
-  };
   res.render("index", templateVars);
 });
 
@@ -46,33 +49,31 @@ app.get("/u/:shortURL", (req, res) => {
 
 // GET: local address containing the registration page
 app.get("/register", (req, res) => {
-  res.render("registration");
+  res.render("registration",templateVars);
+})
+
+// GET: local address containing the login page
+app.get("/login", (req, res) => {
+  res.render("login", templateVars);
 })
 
 // GET: local address containing URLs collection
 app.get("/urls", (req, res) => {
-  let templateVars = {
-    urls: urlDatabase,
-    username: req.cookies["username"]
-  };
+  let localVars = templateVars;
+  console.log(req.params);
+  localVars.user_id = req.cookies.user_id;
   res.render("urls_index", templateVars);
 });
 
 // GET: new local address containing details for a shortened URL
 app.get("/urls/new", (req, res) => {
-  let templateVars = {
-    username: req.cookies["username"]
-  };
   res.render("urls_new", templateVars);
 });
 
 // GET: local address containing details for a shortened URL
 app.get("/urls/:id", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.id,
-    urls: urlDatabase,
-    username: req.cookies["username"]
-  };
+  let vars = templateVars ;
+  vars["shortURL"] = req.params.id;
   res.render("urls_show", templateVars);
 });
 
@@ -80,14 +81,14 @@ app.get("/urls/:id", (req, res) => {
 // then redirects user to /urls
 app.post("/register", (req, res) => {
   if (req.body.email === "") {
-    res.status(404).send("Status Code 400 - Bad Request: The email field is empty.");
+    res.status(400).send("Status Code 400 - Bad Request: The email field is empty.");
   }
   if (req.body.password === "") {
-    res.status(404).send("Status Code 400 - Bad Request: The password field is empty.");
+    res.status(400).send("Status Code 400 - Bad Request: The password field is empty.");
   }
   for (user in users) {
     if ((users[user].email).toLowerCase() === req.body.email.toLowerCase()) {
-      res.status(404).send("Status Code 400 - Bad Request: This email address is already registered.");
+      res.status(400).send("Status Code 400 - Bad Request: This email address is already registered.");
     }
   }
   const uniqueID = generateRandomString(8);
@@ -115,15 +116,28 @@ app.post("/urls", (req, res) => {
 // POST: create cookie for inputted username, then
 // redirects user to /urls
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
-  res.redirect("/urls");
-
+  let id = '';
+  //const username = req.body.username;
+  for (user in users) {
+    if (users[user].email.toLowerCase() === req.body.email.toLowerCase()) {
+      id = users[user].id;
+      if (users[user].password === req.body.password) {
+        // templateVars.user_id = users[user].id;
+        res.cookie('user_id', users[user].id);
+        res.redirect("/urls");
+      } else {
+        res.status(403).send("Status Code 403 - Forbidden: The password is incorrect.");
+      }
+    }
+  }
+  if (!id) {
+    res.status(403).send("Status Code 403 - Forbidden: This email address is not registered.");
+  }
 });
 
 // POST: logs the user out, and redirects user to /urls
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("urls");
 })
 
