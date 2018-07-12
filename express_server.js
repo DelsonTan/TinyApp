@@ -60,7 +60,6 @@ app.get("/login", (req, res) => {
 // GET: local address containing URLs collection
 app.get("/urls", (req, res) => {
   let localVars = templateVars;
-  console.log(req.params);
   localVars.user_id = req.cookies.user_id;
   res.render("urls_index", templateVars);
 });
@@ -80,15 +79,14 @@ app.get("/urls/:id", (req, res) => {
 // POST: adds a new user object in the global users object
 // then redirects user to /urls
 app.post("/register", (req, res) => {
-  if (req.body.email === "") {
-    res.status(400).send("Status Code 400 - Bad Request: The email field is empty.");
-  }
-  if (req.body.password === "") {
-    res.status(400).send("Status Code 400 - Bad Request: The password field is empty.");
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(400).send("Status Code 400 - Bad Request: The email and/or password field is empty.");
+    return;
   }
   for (user in users) {
     if ((users[user].email).toLowerCase() === req.body.email.toLowerCase()) {
       res.status(400).send("Status Code 400 - Bad Request: This email address is already registered.");
+      return;
     }
   }
   const uniqueID = generateRandomString(8);
@@ -116,23 +114,21 @@ app.post("/urls", (req, res) => {
 // POST: create cookie for inputted username, then
 // redirects user to /urls
 app.post("/login", (req, res) => {
-  let id = '';
+  let currentUser;
   //const username = req.body.username;
   for (user in users) {
     if (users[user].email.toLowerCase() === req.body.email.toLowerCase()) {
-      id = users[user].id;
+      currentUser = users[user];
       if (users[user].password === req.body.password) {
         // templateVars.user_id = users[user].id;
-        res.cookie('user_id', users[user].id);
+        res.cookie('user_id', currentUser.id);
         res.redirect("/urls");
-      } else {
-        res.status(403).send("Status Code 403 - Forbidden: The password is incorrect.");
+        return
       }
     }
   }
-  if (!id) {
-    res.status(403).send("Status Code 403 - Forbidden: This email address is not registered.");
-  }
+  res.status(403).send("Status Code 403 - Forbidden: The email or password is incorrect.");
+  return;
 });
 
 // POST: logs the user out, and redirects user to /urls
