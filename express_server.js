@@ -58,6 +58,14 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+// GET: new local address containing details for a shortened URL
+app.get("/urls/new", (req, res) => {
+  let templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("urls_new", templateVars);
+});
+
 // GET: local address containing details for a shortened URL
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
@@ -68,17 +76,12 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-// POST: new local address containing details for a shortened URL
-app.get("/urls/new", (req, res) => {
-  let templateVars = {
-    username: req.cookies["username"]
-  };
-  res.render("urls_new");
-});
+// POST: adds a new user object in the global users object
+
 
 // POST: URL to URLs collection
 app.post("/urls", (req, res) => {
-  const newKey = generateRandomString();
+  const newKey = generateRandomString(6);
   urlDatabase[newKey] = req.body.longURL;
   if (!urlDatabase[newKey].includes("http://") &&
     !urlDatabase[newKey].includes("https://")) {
@@ -127,11 +130,12 @@ app.listen(PORT, () => {
   console.log(`tinyApp listening on port ${PORT}!`);
 });
 
-function generateRandomString() {
+// Generates random string num characters long
+function generateRandomString(num) {
   let text = '';
   const selection = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const strLength = 6;
-  for (let index = 0; index < strLength; index++) {
+  const strLength = num;
+  for (let index = 0; index < num; index++) {
     text += selection.charAt(Math.floor(Math.random() * selection.length));
   }
   return text;
