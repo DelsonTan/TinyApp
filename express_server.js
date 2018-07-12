@@ -66,6 +66,10 @@ app.get("/urls", (req, res) => {
 
 // GET: new local address containing details for a shortened URL
 app.get("/urls/new", (req, res) => {
+  if (templateVars.currentUser === undefined) {
+    res.redirect("/login");
+    return;
+  }
   res.render("urls_new", templateVars);
 });
 
