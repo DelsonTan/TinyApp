@@ -30,7 +30,7 @@ let users = {
 let templateVars = {
   urls: urlDatabase,
   user: users,
-  user_id: undefined
+  currentUser: undefined
 };
 
 // GET: root address
@@ -95,7 +95,7 @@ app.post("/register", (req, res) => {
   users[uniqueID].email    = req.body.email;
   users[uniqueID].password = req.body.password;
   res.cookie('user_id', uniqueID);
-  console.log(users);
+  templateVars.currentUser = users[uniqueID].email;
   res.redirect("/urls");
 })
 
@@ -114,17 +114,13 @@ app.post("/urls", (req, res) => {
 // POST: create cookie for inputted username, then
 // redirects user to /urls
 app.post("/login", (req, res) => {
-  let currentUser;
-  //const username = req.body.username;
   for (user in users) {
-    if (users[user].email.toLowerCase() === req.body.email.toLowerCase()) {
-      currentUser = users[user];
-      if (users[user].password === req.body.password) {
-        // templateVars.user_id = users[user].id;
-        res.cookie('user_id', currentUser.id);
-        res.redirect("/");
-        return
-      }
+    if (users[user].email.toLowerCase() === req.body.email.toLowerCase()
+      && users[user].password === req.body.password) {
+      templateVars.currentUser = users[user].email;
+      res.cookie('user_id', users[user].id);
+      res.redirect("/");
+      return
     }
   }
   res.status(403).send("Status Code 403 - Forbidden: The email or password is incorrect.");
@@ -133,6 +129,7 @@ app.post("/login", (req, res) => {
 
 // POST: logs the user out, and redirects user to /urls
 app.post("/logout", (req, res) => {
+  templateVars.currentUser = undefined;
   res.clearCookie("user_id");
   res.redirect("urls");
 })
