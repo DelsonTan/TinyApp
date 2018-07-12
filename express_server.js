@@ -161,7 +161,13 @@ app.post("/logout", (req, res) => {
 
 // DELETE: URL from URL collection
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
+  if (!req.cookies.user_id) {
+    res.redirect("/login");
+    return;
+  }
+  if (req.params.id == req.cookies.user_id) {
+    delete urlDatabase[req.params.id];
+  }
   res.redirect('/urls');
 });
 
