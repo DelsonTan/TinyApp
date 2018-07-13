@@ -3,18 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>TinyApp</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+  <div style="text-align:center">
   <header>
     <h1>TinyApp</h1>
   </header>
   <% if (currentUser) { %>
-  <p>Hello, <%=currentUser%>!</p>
+  <p>Hello, <%=user[currentUser].email%>!</p>
+  <a class="btn btn-primary" href="http://localhost:8080/urls/" role="button">My URLs</a>
+  <a class="btn btn-primary" href="http://localhost:8080/urls/new" role="button">Shorten a URL!</a>
+  <br>
   <form method="POST" action="/logout">
-      <input type="submit" value="Log out"></input>
+      <input type="submit" value="Log out" class="btn btn-outline-primary"></input>
   </form>
   <%} else {%>
-  <p><a href="http://localhost:8080/login">Login</a> </p>
-  <p><a href="http://localhost:8080/register">Register</a> </p>
+    
+  <p><button type="button" class="btn btn-primary"><a href="http://localhost:8080/login">Login</a></button> </p>
+  <p><button type="button" class="btn btn-primary"><a href="http://localhost:8080/register">Register</a></button></p>
   <%}%>
 <br>
+</div>
 </head>
 </html>

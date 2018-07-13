@@ -1,21 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B"
+    crossorigin="anonymous">
   <%- include('partials/_header') %>
 </head>
+
 <body>
-  <table>
-    <tr><th> URLS </th></tr>
-    <tr><td>Short</td>      <td>Full</td></tr>
-    <tr><td><%=shortURL%></td>
-        <td><%=urls[shortURL]%></td></tr>
-  </table>
+  <div class="mx-auto" style="width: 200px;">
+    <table>
+      <tr>
+        <td>Short URL</td>
+        <td>Full URL</td>
+      </tr>
+      <tr>
+        <td>
+          <%=shortURL%>
+        </td>
+        <td>
+          <%=urls[shortURL].longURL%>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="mx-auto" style="width: 600px;">
     <form action="/urls/<%=shortURL%>/update" method="POST" style="margin:150px;">
       <label for="<shortURL>">Update URL:</label>
       <input id="<=shortURL>" type="text" name="<%=shortURL%>" placeholder="http://" style="width: 300px">
-      <input type="submit" value="Update">
+      <input type="submit" class="btn btn-primary" value="Update">
     </form>
-    <p><a href="http://localhost:8080/urls/">URL Index</a></p>
+  </div>
 </body>
+
 </html>

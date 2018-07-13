@@ -54,10 +54,9 @@ app.get("/", (req, res) => {
 });
 
 // GET: endpoint for /u/:shortURL
-// IF: shortURL does not exist in url database,
-// THEN: SEND to HTML page with error code 404
-// ELSE: REDIRECT to corresponding longURL value shortURL is the key for
+// REDIRECT to corresponding longURL value shortURL is the key for
 app.get("/u/:shortURL", (req, res) => {
+  // IF: shortURL does not exist in url database
   if (!urlDatabase[req.params["shortURL"]]) {
     res.status(404).send("Status Code 404 - Not Found: The URL you requested for was not found");
     return;
@@ -79,11 +78,9 @@ app.get("/login", (req, res) => {
 })
 
 // GET: endpoint for /urls
-// IF: request did not pass a cookie identified as user_id
-// THEN: REDIRECT to /login
-// ELSE: RENDER /urls_index, with only URLs from urlDatabase
-//       the user has made
+// RENDER /urls_index, with only URLs from urlDatabase the user has made
 app.get("/urls", (req, res) => {
+  // IF: request did not pass a cookie identified as user_id, REDIRECT to /login
   if (!req.session.user_id) {
     res.redirect("/login");
     return;
@@ -92,10 +89,9 @@ app.get("/urls", (req, res) => {
 });
 
 // GET: endpoint for /urls/new
-// IF: request did not pass a cookie identified as user_id
-// THEN: REDIRECT to login
-// ELSE: RENDER /urls/new, with template variables
+// RENDER /urls/new, with template variables
 app.get("/urls/new", (req, res) => {
+  // IF: request did not pass a cookie identified as user_id, REDIRECT to login
   if (req.session.user_id === undefined) {
     res.redirect("/login");
     return;
@@ -116,13 +112,14 @@ app.get("/urls/:id", (req, res) => {
     if (req.params.id === shortURL) {
       // IF: user_id cookie does not match the id value for the passed id parameter,
       // redirect to /urls
-      if (req.session.user_id !== urlDatabase[req.params.id].id) {
+      if (req.session.user_id !== urlDatabase[req.params.id].user) {
         res.redirect("/urls");
         return;
       }
-      let vars = templateVars;
-      vars["shortURL"] = req.params.id;
-      res.render("urls_show", templateVars(req.cookies("user_id")));
+      let localVars = (templateVars(req.session.user_id));
+      localVars.shortURL = req.params.id;
+      localVars.longURL = urlDatabase[req.params.id].longURL;
+      res.render("urls_show", localVars);
       return;
     }
   }
@@ -213,15 +210,15 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect('/urls');
 });
 
-// PUT: handler for updating long URL value for inputted short URL key to a new value
-// REDIRECT to /urls
-// ASSUME: entered URL is valid
+// PUT: handler for updating long URL value for inputted short URL key to a new value, REDIRECT to /urls
+// ASSUME: entered URL is valid. If longURL field is empty, the shortURL is effectively deleted
 app.post("/urls/:id/update", (req, res) => {
-  const newShort = req.params.id;
-  urlDatabase[shortURL] = req.body[newShort];
-  if (!urlDatabase[newShort].includes("http://") &&
-    !urlDatabase[newShort].includes("https://")) {
-    urlDatabase[newShort].longURL = "http://" + urlDatabase[shortURL];
+  const reqShort = req.params.id;
+  console.log(req.body);
+  urlDatabase[reqShort].longURL = req.body[reqShort];
+  if (!urlDatabase[reqShort].longURL.includes("http://") &&
+    !urlDatabase[reqShort].longURL.includes("https://")) {
+    urlDatabase[reqShort].longURL = "http://" + urlDatabase[reqShort].longURL;
   }
   res.redirect('/urls');
 });
@@ -260,3 +257,4 @@ function urlsForUser(id) {
   newTemplateVars.currentUser = id;
   return newTemplateVars;
 }
+
