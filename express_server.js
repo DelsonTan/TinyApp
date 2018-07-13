@@ -27,12 +27,12 @@ let users = {
   "3ns8dA": {
     id: "3ns8dA",
     email: "user1@user.com",
-    password: "purple-monkey-dinosaur"
+    password: "$2b$12$t9zpRfXxPV70sbUtM4AQ6epm/RlQGYA5KILc9Icvivs19H97nF0UW" // "purple-monkey-dinosaur"
   },
  "K49kds": {
     id: "K49kds",
     email: "user2@user.com",
-    password: "dishwasher-funk"
+    password: "$2b$12$YExU3sSoUu1iwbC.UOl0zuAnVxTQAkx7m9CR5uuxQzvo0aOKdBILS" //  "dishwasher-funk"
   }
 };
 
@@ -121,7 +121,6 @@ app.post("/register", (req, res) => {
   users[uniqueID].email    = req.body.email;
   users[uniqueID].password = bcrypt.hashSync(req.body.password, saltRounds);
   res.cookie('user_id', uniqueID);
-  console.log(users);
   res.redirect("/urls");
 })
 
@@ -136,7 +135,6 @@ app.post("/urls", (req, res) => {
   urlDatabase[newKey] = {};
   urlDatabase[newKey].longURL = newURL;
   urlDatabase[newKey].user = req.cookies.user_id;
-  console.log(urlDatabase);
   res.redirect(`/urls/${newKey}`);
 });
 
@@ -148,8 +146,9 @@ app.post("/login", (req, res) => {
     return;
   }
   for (let user in users) {
+    console.log(bcrypt.compareSync(req.body.password, users[user].password));
     if (users[user].email.toLowerCase() === req.body.email.toLowerCase()
-      && users[user].password === req.body.password) {
+      && bcrypt.compareSync(req.body.password, users[user].password)) {
       res.cookie('user_id', users[user].id);
       res.redirect("/");
       return
