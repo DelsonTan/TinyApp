@@ -68,12 +68,20 @@ app.get("/u/:shortURL", (req, res) => {
 // GET: endpoint for /register
 // RENDER: registration.ejs, with template variables
 app.get("/register", (req, res) => {
+  if (req.session.user_id) {
+    res.redirect("/urls");
+    return;
+  }
   res.render("registration", templateVars(req.session.user_id));
 })
 
 // GET: endpoint for /login
 // RENDER: login.ejs, with template variables
 app.get("/login", (req, res) => {
+  if (req.session.user_id) {
+    res.redirect("/urls");
+    return;
+  }
   res.render("login", templateVars(req.session.user_id));
 })
 
