@@ -1,27 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>TinyApp</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B"
+    crossorigin="anonymous">
   <header>
-    <h1>TinyApp</h1>
+    <div class="mx-auto" style="height: 200px"></div>
+    <h1 align="center" class="mx-auto; text-primary bg-light" style="width: 9  00px;text-align:center;height: 100px;">TinyApp</h1>
   </header>
 </head>
+
 <body>
 
-<form action="/register" method="POST">
-  <div>
-    <label for="email">Email address</label>
-    <input type="text" id="email" name="email" placeholder="Enter email">
+  <form action="/register" method="POST">
+    <div class="mx-auto" style="width: 200px;text-align: center">
+      <label for="email">E-mail Address:</label>
+      <input type="text" id="email" name="email" placeholder="Enter email address">
+    </div>
+    <div class="mx-auto" style="width: 200px;text-align: center">
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" placeholder="Enter password">
+    </div>
+    <div class="mx-auto" style="width: 200px;text-align: center">
+      <br>
+      <button class="btn btn-primary" type="submit">Register</button>
+    </div>
+  </form>
+  <div class="mx-auto" style="width: 200px;text-align: center">
+    <p>
+      Or <a href="http://localhost:8080/login">log in</a>
+    </p>
   </div>
-  <div>
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password" placeholder="Password">
-  </div>
-  <button type="submit">Register</button>
-</form>
-<div>
-  <p><a href="http://localhost:8080/login">Login</a> </p>
-</div>
 </body>
+
 </html>

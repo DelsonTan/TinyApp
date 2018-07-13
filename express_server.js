@@ -214,7 +214,6 @@ app.post("/urls/:id/delete", (req, res) => {
 // ASSUME: entered URL is valid. If longURL field is empty, the shortURL is effectively deleted
 app.post("/urls/:id/update", (req, res) => {
   const reqShort = req.params.id;
-  console.log(req.body);
   urlDatabase[reqShort].longURL = req.body[reqShort];
   if (!urlDatabase[reqShort].longURL.includes("http://") &&
     !urlDatabase[reqShort].longURL.includes("https://")) {

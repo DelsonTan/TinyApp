@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head></head>
-  <body style="font-size:20px; padding:50px;">
-    <% include partials/_header %>
+
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B"
+    crossorigin="anonymous">
+  <% include partials/_header %>
+</head>
+
+<body style="font-size:20px; padding:50px;">
+  <div class="mx-auto" style="width: 800px;">
     <form action="/urls" method="POST" style="margin:150px;">
       <label for="longURL">Enter a URL:</label>
       <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
-      <input type="submit" value="Submit">
+      <div class="mx-auto" style="width: 200px;">
+        <input class="btn btn-primary" type="submit" value="Submit">
+      </div>
     </form>
-  </body>
+  </div>
+</body>
+
 </html>
