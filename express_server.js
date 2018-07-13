@@ -113,10 +113,10 @@ app.get("/urls/:id", (req, res) => {
   }
   // Checks urlDatabase for whether the inputted shortURL exists
   for (let shortURL in urlDatabase) {
-    if (req.params === shortURL) {
+    if (req.params.id === shortURL) {
       // IF: user_id cookie does not match the id value for the passed id parameter,
       // redirect to /urls
-      if (req.session.user_id !== urlDatabase[req.session.user_id].id) {
+      if (req.session.user_id !== urlDatabase[req.params.id].id) {
         res.redirect("/urls");
         return;
       }
