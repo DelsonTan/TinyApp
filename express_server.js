@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 
 const bcrypt = require('bcrypt');
 const saltRounds = 12;
@@ -10,7 +10,10 @@ const saltRounds = 12;
 app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: "session",
+  keys: ["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"]
+}));
 
 let urlDatabase = {
   "b2xVn2": {
@@ -46,7 +49,7 @@ function templateVars(cookie_user_id) {
 
 // GET: root address
 app.get("/", (req, res) => {
-  res.render("index", templateVars(req.cookies.user_id));
+  res.redirect("/urls");
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -60,39 +63,39 @@ app.get("/u/:shortURL", (req, res) => {
 
 // GET: local address containing the registration page
 app.get("/register", (req, res) => {
-  res.render("registration",templateVars(req.cookies.user_id));
+  res.render("registration",templateVars(req.session.user_id));
 })
 
 // GET: local address containing the login page
 app.get("/login", (req, res) => {
-  res.render("login", templateVars(req.cookies.user_id));
+  res.render("login", templateVars(req.session.user_id));
 })
 
 // GET: local address containing URLs collection
 app.get("/urls", (req, res) => {
-  if (!req.cookies.user_id) {
+  if (!req.session.user_id) {
     res.redirect("/login");
     return;
   }
-  res.render("urls_index", urlsForUser(req.cookies.user_id));
+  res.render("urls_index", urlsForUser(req.session.user_id));
 });
 
 // GET: new local address containing details for a shortened URL
 app.get("/urls/new", (req, res) => {
-  if (req.cookies.user_id === undefined) {
+  if (req.session.user_id === undefined) {
     res.redirect("/login");
     return;
   }
-  res.render("urls_new", templateVars(req.cookies.user_id));
+  res.render("urls_new", templateVars(req.session.user_id));
 });
 
 // GET: local address containing details for a shortened URL
 app.get("/urls/:id", (req, res) => {
-  if (!req.cookies.user_id) {
+  if (!req.session.user_id) {
     res.redirect("/login");
     return;
   }
-  if (req.cookies.user_id !== urlDatabase[req.params.id].id) {
+  if (req.session.user_id !== urlDatabase[req.params.id].id) {
     res.redirect("/urls");
     return;
   }
@@ -120,7 +123,7 @@ app.post("/register", (req, res) => {
   users[uniqueID].id       = uniqueID;
   users[uniqueID].email    = req.body.email;
   users[uniqueID].password = bcrypt.hashSync(req.body.password, saltRounds);
-  res.cookie('user_id', uniqueID);
+  req.session.user_id = uniqueID;
   res.redirect("/urls");
 })
 
@@ -134,7 +137,7 @@ app.post("/urls", (req, res) => {
   }
   urlDatabase[newKey] = {};
   urlDatabase[newKey].longURL = newURL;
-  urlDatabase[newKey].user = req.cookies.user_id;
+  urlDatabase[newKey].user = req.session.user_id;
   res.redirect(`/urls/${newKey}`);
 });
 
@@ -149,7 +152,7 @@ app.post("/login", (req, res) => {
     console.log(bcrypt.compareSync(req.body.password, users[user].password));
     if (users[user].email.toLowerCase() === req.body.email.toLowerCase()
       && bcrypt.compareSync(req.body.password, users[user].password)) {
-      res.cookie('user_id', users[user].id);
+      req.session.user_id = users[user].id;
       res.redirect("/");
       return
     }
@@ -160,18 +163,17 @@ app.post("/login", (req, res) => {
 
 // POST: logs the user out, and redirects user to /urls
 app.post("/logout", (req, res) => {
-  templateVars.currentUser = undefined;
-  res.clearCookie("user_id");
-  res.redirect("urls");
+  req.session = null;
+  res.redirect("/urls");
 })
 
 // DELETE: URL from URL collection
 app.post("/urls/:id/delete", (req, res) => {
-  if (!req.cookies.user_id) {
+  if (!req.session.user_id) {
     res.redirect("/login");
     return;
   }
-  if (urlDatabase[req.params.id].user === req.cookies.user_id) {
+  if (urlDatabase[req.params.id].user === req.session.user_id) {
     delete urlDatabase[req.params.id];
   }
   res.redirect('/urls');
