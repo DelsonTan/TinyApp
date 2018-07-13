@@ -9,7 +9,7 @@ const saltRounds = 12;
 
 app.set("view engine", "ejs");
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: "session",
   keys: ["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"]
@@ -32,7 +32,7 @@ let users = {
     email: "user1@user.com",
     password: "$2b$12$t9zpRfXxPV70sbUtM4AQ6epm/RlQGYA5KILc9Icvivs19H97nF0UW" // "purple-monkey-dinosaur"
   },
- "K49kds": {
+  "K49kds": {
     id: "K49kds",
     email: "user2@user.com",
     password: "$2b$12$YExU3sSoUu1iwbC.UOl0zuAnVxTQAkx7m9CR5uuxQzvo0aOKdBILS" //  "dishwasher-funk"
@@ -64,12 +64,12 @@ app.get("/u/:shortURL", (req, res) => {
   }
   let longURL = urlDatabase[req.params["shortURL"]].longURL;
   res.redirect(302, longURL);
-  })
+})
 
 // GET: endpoint for /register
 // RENDER: registration.ejs, with template variables
 app.get("/register", (req, res) => {
-  res.render("registration",templateVars(req.session.user_id));
+  res.render("registration", templateVars(req.session.user_id));
 })
 
 // GET: endpoint for /login
@@ -111,27 +111,34 @@ app.get("/urls/:id", (req, res) => {
     res.redirect("/login");
     return;
   }
-  // IF: user_id cookie does not match the id value for the passed id parameter,
-  // redirect to /urls
-  if (req.session.user_id !== urlDatabase[req.params.id].id) {
-    res.redirect("/urls");
-    return;
+  // Checks urlDatabase for whether the inputted shortURL exists
+  for (let shortURL in urlDatabase) {
+    if (req.params === shortURL) {
+      // IF: user_id cookie does not match the id value for the passed id parameter,
+      // redirect to /urls
+      if (req.session.user_id !== urlDatabase[req.session.user_id].id) {
+        res.redirect("/urls");
+        return;
+      }
+      let vars = templateVars;
+      vars["shortURL"] = req.params.id;
+      res.render("urls_show", templateVars(req.cookies("user_id")));
+      return;
+    }
   }
-
-  let vars = templateVars ;
-  vars["shortURL"] = req.params.id;
-  res.render("urls_show", templateVars(req.cookies("user_id")));
+  // Matching shortURL was not found
+  res.status(404).send("Status Code 404 - Not Found: The URL you requested for was not found");
 });
 
 // POST: handler for adding new user object in the users database
 // REDIRECT to /urls if successful
 app.post("/register", (req, res) => {
-  // IF: email and/or password field empty, then SEND to html page with error code 400
+  // IF: email and/or password field is empty
   if (req.body.email === "" || req.body.password === "") {
     res.status(400).send("Status Code 400 - Bad Request: The email and/or password field is empty.");
     return;
   }
-  // IF: inputted email did not match any user in the users database(case insensitive), SEND to html page with eror code 400
+  // IF: inputted email did not match any user in the users database(case insensitive)
   for (let user in users) {
     if ((users[user].email).toLowerCase() === req.body.email.toLowerCase()) {
       res.status(400).send("Status Code 400 - Bad Request: This email address is already registered.");
@@ -139,9 +146,9 @@ app.post("/register", (req, res) => {
     }
   }
   const uniqueID = generateRandomString(8);
-  users[uniqueID]          = {}
-  users[uniqueID].id       = uniqueID;
-  users[uniqueID].email    = req.body.email;
+  users[uniqueID] = {}
+  users[uniqueID].id = uniqueID;
+  users[uniqueID].email = req.body.email;
   users[uniqueID].password = bcrypt.hashSync(req.body.password, saltRounds);
   req.session.user_id = uniqueID;
   res.redirect("/urls");
